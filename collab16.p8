@@ -23,9 +23,7 @@ som={
   self.big_bubbles={}
   t=0
   self.score=0
-  for i=0,15 do
-   add(self.bubbles,{s=29,x=rnd(128),y=rnd(128),dx=0})
-  end
+  self:populate_bubbles()
   for i=0,6 do
    add(self.big_bubbles,
     {
@@ -35,7 +33,7 @@ som={
     dy=-rnd(1)
     })
   end
-  self.pl={x=64,y=120,dx=0,dy=-4,s=12}
+  self.pl={x=64,y=127,dx=0,dy=-5,s=12}
  end,
  title={
  _update=function(self)
@@ -93,6 +91,9 @@ som={
    self.score+=1
    sfx(8)
    del(self.bubbles, pop)
+   if #self.bubbles==0 then
+    self:populate_bubbles()
+   end
   end
   
   pl.s=13+sgn(pl.dy)
@@ -106,13 +107,11 @@ som={
   spr(entity.s,entity.x,entity.y,1,1,entity.dx<0)
  end,
  distance=function(a,b)
-  local x=a.x-b.x
-  local y=a.y-b.y
-  return sqrt(x*x+y*y)
+  return abs(a.x-b.x)+abs(a.y-b.y)
  end,
  closest_bubble=function(self)
   local poppable
-  local min_distance=6
+  local min_distance=8
   foreach(self.bubbles, function(bubble)
    local distance=self.distance(self.pl,bubble)
    if distance < min_distance then
@@ -121,6 +120,11 @@ som={
    end
   end)
   return poppable
+ end,
+ populate_bubbles=function(self)
+  for i=0,15 do
+   add(self.bubbles,{s=29,x=rnd(128),y=127+rnd(128),dx=0})
+  end
  end,
  
  _update=function(self)
