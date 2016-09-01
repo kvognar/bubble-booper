@@ -16,6 +16,7 @@ end
 som={
  name="bubble booper",
  author="somnule",
+ hiscore=0,
  _init=function(self)
   self.state=self.title
   
@@ -41,9 +42,10 @@ som={
    self.state=self.game
   end
  end,
- _draw=function()
+ _draw=function(self)
   print("bubble booper",40,60,7)
   print("press —",48,66)
+  print("hi score: "..self.hiscore,43,110)
  end,
  },
  game={
@@ -70,6 +72,7 @@ som={
   if pl.y>140 then
    --die
    sfx(9)
+   self.hiscore=max(self.hiscore,self.score)
    self:_init()
   end
   
@@ -81,8 +84,6 @@ som={
     bubble.x=rnd(128)
    end
   end)
-  
-
   
   pl.dy+=.15
   local pop=self:closest_bubble()
