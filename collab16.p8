@@ -15,6 +15,7 @@ end
 
 som={
  _init=function(self)
+  self.state=self.title
   t=0
   for i=0,15 do
    self:make_bubble(rnd(128),rnd(128))
@@ -27,11 +28,23 @@ som={
     y=rnd(128),
     r=15+rnd(10),
     sin_offset=rnd(),
-    dy=-rnd(1,2)}
-    )
+    dy=-rnd(1,2)
+    })
   end
   self.pl={x=64,y=64,dx=0,dy=-2,s=12}
  end,
+ title={
+ _update=function(self)
+  if btn(5) then
+   self.state=self.game
+  end
+ end,
+ _draw=function(self)
+  print("bubble booper",40,60,7)
+  print("press —",48,66)
+ end,
+ },
+ game={
  _update=function(self)
   --player
   local pl=self.pl
@@ -47,8 +60,6 @@ som={
     bubble.x=rnd(128)
    end
   end)
-  
-  foreach(self.big_bubbles,self.update_bubble)
   
   --buttons
   if btn(0) then 
@@ -67,16 +78,8 @@ som={
    sfx(8)
    del(self.bubbles, pop)
   end
-  
-  t+=.01
  end,
  _draw=function(self)
-  cls()
-  rectfill(0,0,127,127,1)
-  foreach(self.big_bubbles,function(bubble)
-   circfill(bubble.x,bubble.y,bubble.r,13)
-  end)
-  
   foreach(self.bubbles,self.draw_entity)
   
   if self.pl.dy<0 then
@@ -85,19 +88,19 @@ som={
    self.pl.s=12
   end
   self.draw_entity(self.pl)
+ end,},
+ draw_bg=function(self)
+  rectfill(0,0,127,127,1)
+  foreach(self.big_bubbles,function(bubble)
+   circfill(bubble.x,bubble.y,bubble.r,13)
+  end)
  end,
  bubbles={},
  big_bubbles={},
  make_bubble=function(self,x,y)
   add(self.bubbles,{s=29,x=x,y=y})
  end,
- update_bubble=function(bubble)
-  bubble.y+=bubble.dy
-  bubble.x=bubble.sx+5*sin(t+bubble.sin_offset)
-  if bubble.y+bubble.r<0 then
-   bubble.y=150
-  end
- end,
+
  draw_entity=function(entity)
   spr(entity.s,entity.x,entity.y,1,1,entity.left)
  end,
@@ -124,6 +127,25 @@ som={
    end
   end)
   return poppable
+ end,
+ 
+ _update=function(self)
+   -- background
+  foreach(self.big_bubbles,function(bubble)
+   bubble.y+=bubble.dy
+   bubble.x=bubble.sx+5*sin(t+bubble.sin_offset)
+   if bubble.y+bubble.r<0 then
+    bubble.y=150
+   end
+  end)
+  
+  self.state._update(self)
+  t+=.01
+ end,
+ _draw=function(self)
+  cls()
+  self:draw_bg()
+  self.state._draw(self)
  end
 }
 __gfx__
