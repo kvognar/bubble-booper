@@ -14,27 +14,28 @@ function _draw()
 end
 
 som={
+ name="bubble booper",
+ author="somnule",
  _init=function(self)
   self.state=self.title
   
   self.bubbles={}
   self.big_bubbles={}
   t=0
+  self.score=0
   for i=0,15 do
-   add(self.bubbles,{s=29,x=rnd(128),y=rnd(128)})
+   add(self.bubbles,{s=29,x=rnd(128),y=rnd(128),dx=0})
   end
   for i=0,6 do
-   local x=rnd(128)
    add(self.big_bubbles,
-    {x=x,
-    sx=x,
+    {
+    sx=rnd(128),
     y=rnd(128),
     r=15+rnd(10),
-    sin_offset=rnd(),
-    dy=-rnd(1,2)
+    dy=-rnd(1)
     })
   end
-  self.pl={x=64,y=64,dx=0,dy=-2,s=12}
+  self.pl={x=64,y=120,dx=0,dy=-4,s=12}
  end,
  title={
  _update=function(self)
@@ -49,8 +50,20 @@ som={
  },
  game={
  _update=function(self)
-  --player
+ 
   local pl=self.pl
+ 
+   --buttons
+  if btn(0) then 
+   pl.dx-=1
+  end
+  if btn(1) then 
+   pl.dx+=1
+  end
+  pl.dx*=.8
+  
+  --player
+  pl.dx=mid(pl.dx,-2,2)
   pl.x+=pl.dx
   pl.y+=pl.dy
   pl.x=mid(pl.x,0,122)
@@ -71,20 +84,13 @@ som={
    end
   end)
   
-  --buttons
-  if btn(0) then 
-   pl.dx= -2
-   pl.left=true
-  elseif btn(1) then 
-   pl.dx=2
-   pl.left=false
-  else pl.dx=0
-  end
+
   
-  pl.dy+=.1
+  pl.dy+=.15
   local pop=self:closest_bubble()
   if pop then
    pl.dy=-3
+   self.score+=1
    sfx(8)
    del(self.bubbles, pop)
   end
@@ -94,9 +100,10 @@ som={
  _draw=function(self)
   foreach(self.bubbles,self.draw_entity)
   self.draw_entity(self.pl)
+  print(self.score)
  end,},
  draw_entity=function(entity)
-  spr(entity.s,entity.x,entity.y,1,1,entity.left)
+  spr(entity.s,entity.x,entity.y,1,1,entity.dx<0)
  end,
  distance=function(a,b)
   local x=a.x-b.x
@@ -105,19 +112,12 @@ som={
  end,
  closest_bubble=function(self)
   local poppable
-  local min_distance
+  local min_distance=6
   foreach(self.bubbles, function(bubble)
    local distance=self.distance(self.pl,bubble)
-   if distance < 5 then
-    if not poppable then
-     poppable=bubble
-     min_distance=distance
-    else
-     if distance < min_distance then
-      poppable=bubble
-      min_distance=distance
-     end
-    end 
+   if distance < min_distance then
+    poppable=bubble
+    min_distance=distance
    end
   end)
   return poppable
@@ -127,8 +127,8 @@ som={
    -- background
   foreach(self.big_bubbles,function(bubble)
    bubble.y+=bubble.dy
-   bubble.x=bubble.sx+5*sin(t+bubble.sin_offset)
-   if bubble.y+bubble.r<0 then
+   bubble.x=bubble.sx+5*sin(t+bubble.r)
+   if bubble.y<-30 then
     bubble.y=150
    end
   end)
@@ -156,8 +156,8 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f0f0000000000000f0f00000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000088880000cccc000000000000000000
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000800c0000c00000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080220008c066000c0000000000000000
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080200008c060000c0000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080220008c07e000c0000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080200008c0c0000c0000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000008c000000c0000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000008c000000c0000000000000000
 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000800c0000c00000000000000000
